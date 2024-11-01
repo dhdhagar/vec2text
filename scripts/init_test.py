@@ -21,6 +21,15 @@ def parse_args():
     parser.add_argument(
         "--inversion_steps", type=int, default=20
     )
+    parser.add_argument(
+        "--sequence_beam_width", type=int, default=1
+    )
+    parser.add_argument(
+        "--interpolate", action=argparse.BooleanOptionalAction, default=False
+    )
+    parser.add_argument(
+        "--interpolate_alpha", type=float, default=0.5
+    )
     args = parser.parse_args()
     return args
 
@@ -53,11 +62,23 @@ if __name__ == "__main__":
     while _input := input("Enter text: "):
         if _input == "exit":
             break
-        embeddings = get_gtr_embeddings([_input], encoder, tokenizer)
+        
+        inputs = [_input]
+        
+        if args.interpolate:
+            _input2 = input("Enter text 2: ")
+            inputs.append(_input2)
+        
+        embeddings = get_gtr_embeddings(inputs, encoder, tokenizer)
+        
+        if args.interpolate:
+            embeddings = torch.lerp(input=embeddings[0], end=embeddings[1], weight=args.interpolate_alpha)[None, :]
+        
         inverted = vec2text.invert_embeddings(
             embeddings=embeddings.cuda(),
             corrector=corrector,
-            num_steps=args.inversion_steps
+            num_steps=args.inversion_steps,
+            sequence_beam_width=args.sequence_beam_width,
         )
         print(inverted)
         print("")
