@@ -4,6 +4,7 @@ import torch
 import vec2text
 import os
 os.environ['HF_HOME'] = '/work/dagarwal_umass_edu/HF_HOME'
+os.environ['TRANSFORMERS_CACHE'] = '/work/dagarwal_umass_edu/HF_HOME'
 
 
 def parse_args():
