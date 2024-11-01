@@ -72,7 +72,22 @@ if __name__ == "__main__":
         embeddings = get_gtr_embeddings(inputs, encoder, tokenizer)
         
         if args.interpolate:
-            embeddings = torch.lerp(input=embeddings[0], end=embeddings[1], weight=args.interpolate_alpha)[None, :]
+            if args.interpolate_alpha != -1:
+                embeddings = torch.lerp(input=embeddings[0], end=embeddings[1], weight=args.interpolate_alpha)[None, :]
+            else:
+                # Interpolate at all alpha values
+                for alpha in torch.linspace(0, 1, 11):
+                    interpolated = torch.lerp(input=embeddings[0], end=embeddings[1], weight=alpha)[None, :]
+                    inverted = vec2text.invert_embeddings(
+                        embeddings=interpolated.cuda(),
+                        corrector=corrector,
+                        num_steps=args.inversion_steps,
+                        sequence_beam_width=args.sequence_beam_width,
+                    )
+                    print(f"Alpha: {alpha:.1f}")
+                    print(inverted)
+                    print("")
+                continue
         
         inverted = vec2text.invert_embeddings(
             embeddings=embeddings.cuda(),
