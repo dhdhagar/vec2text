@@ -70,10 +70,12 @@ if __name__ == "__main__":
             inputs.append(_input2)
         
         embeddings = get_gtr_embeddings(inputs, encoder, tokenizer)
+        embeddings = embeddings.cpu()
         
         if args.interpolate:
             if args.interpolate_alpha != -1:
                 embeddings = torch.lerp(input=embeddings[0], end=embeddings[1], weight=args.interpolate_alpha)[None, :]
+                embeddings = embeddings.cpu()
             else:
                 # Interpolate at all alpha values
                 for alpha in torch.linspace(0, 1, 11):
