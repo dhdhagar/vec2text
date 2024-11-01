@@ -50,7 +50,9 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
     corrector = vec2text.load_pretrained_corrector(args.corrector)
 
-    while _input := input("Enter text: ") != "exit":
+    while _input := input("Enter text: "):
+        if _input == "exit":
+            break
         embeddings = get_gtr_embeddings([_input], encoder, tokenizer)
         inverted = vec2text.invert_embeddings(
             embeddings=embeddings.cuda(),
